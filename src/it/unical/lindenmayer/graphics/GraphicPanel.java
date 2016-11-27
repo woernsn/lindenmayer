@@ -24,7 +24,7 @@ public class GraphicPanel extends JFrame {
 	public GraphicPanel() {
 		super("Lindenmayer");
 		this.setSize(800, 800);
-		this.setVisible(true);
+		this.setVisible(false);
 
 		this.panel = new LinePanel();
 

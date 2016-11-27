@@ -27,7 +27,7 @@ public class LindenmayerTest {
 		
 		lm.addRule(r1);
 		
-//		lm.start('F');
+		lm.start('F');
 		
 		
 		
@@ -58,6 +58,6 @@ public class LindenmayerTest {
 		lm2.addRule(r1);
 		lm2.addRule(r2);
 		
-		lm2.start('F');
+//		lm2.start('F');
 	}
 }

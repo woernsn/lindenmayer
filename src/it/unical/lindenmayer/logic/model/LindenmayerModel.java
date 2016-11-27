@@ -53,6 +53,7 @@ public class LindenmayerModel {
 			rootNode.replaceAndDrawChilds(i);
 		}
 		
+		this.gp.setVisible(true);
 		this.gp.startAnimation(this.timeout);
 	}
 	
