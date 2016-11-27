@@ -6,11 +6,11 @@ public class LindenmayerModel {
 
 	private final static double DEFAULT_ANGLE = 45;
 	private final static double DEFAULT_STEPSIZE = 100;
-	private final static int DEFAULT_TIMEOUT = 1;
+	private final static double DEFAULT_TIMEOUT = 1;
 	
 	private double angle;
 	private double stepSize;
-	private int timeout;
+	private double timeout;
 	protected RuleMap rules;
 	private int steps;
 	
@@ -27,9 +27,11 @@ public class LindenmayerModel {
 	public LindenmayerModel(double angle, double stepSize) {
 		this.angle = angle;
 		this.stepSize = stepSize;
-		this.rules = new RuleMap();
 		this.gp = new GraphicPanel();
 		this.timeout = DEFAULT_TIMEOUT;
+
+		Node finalNode = new Node(this, 'X');
+		this.rules = new RuleMap(finalNode);
 	}
 
 	public void addRule(Rule r) {
@@ -60,7 +62,7 @@ public class LindenmayerModel {
 	}
 
 	public void setAngle(double angle) {
-		this.angle = 90-angle;
+		this.angle = angle;
 	}
 
 	public double getStepSize() {
@@ -87,11 +89,11 @@ public class LindenmayerModel {
 		this.gp = gp;
 	}
 
-	public int getTimeout() {
+	public double getTimeout() {
 		return timeout;
 	}
 
-	public void setTimeout(int timeout) {
+	public void setTimeout(double timeout) {
 		this.timeout = timeout;
 	}
 	

@@ -12,11 +12,14 @@ public class RuleMap {
 	private int propabilities;
 	private Map<Character, List<Rule>> ruleMap;
 
-	public RuleMap() {
+	private Node finalNode;
+
+	public RuleMap(Node finalNode) {
 		this.propabilities = 0;
 		this.ruleMap = new HashMap<>();
+		this.finalNode = finalNode;
 	}
-	
+
 	public Node getNewNode(Node nodeFrom) {
 		return getNewNode(nodeFrom.getSymbol());
 	}
@@ -25,11 +28,15 @@ public class RuleMap {
 		Random rand = new Random();
 		int randomNumber = rand.nextInt(100);
 		int sum = 0;
-		for (Rule r : this.ruleMap.get(symbolFrom)) {
-			sum += r.getPropability();
-			if (randomNumber < sum) {
-				return r.getNodeTo();
+		try {
+			for (Rule r : this.ruleMap.get(symbolFrom)) {
+				sum += r.getPropability();
+				if (randomNumber < sum) {
+					return r.getNodeTo();
+				}
 			}
+		} catch (NullPointerException e) {
+			return this.finalNode;
 		}
 
 		return null;

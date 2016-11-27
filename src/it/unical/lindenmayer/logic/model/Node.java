@@ -11,12 +11,17 @@ public class Node {
 	private char symbol;
 	private Map<Direction, Node> childNodes;
 
+	private Direction direction;
+	private Direction lastDirection; // needed for calculation Center/Center
 	private Point2D startCoordinates, endCoordinates;
+	private double angle;
 
 	protected Node(LindenmayerModel lModel, char s) {
 		this.lModel = lModel;
 		this.symbol = s;
 		this.childNodes = new HashMap<>();
+		this.direction = Direction.CENTER; // default
+		this.lastDirection = Direction.CENTER; // default
 	}
 
 	public Node getChildNode(Direction d) {
@@ -24,6 +29,7 @@ public class Node {
 	}
 
 	public void setChildNode(Direction d, Node n) {
+		n.direction = d;
 		this.childNodes.put(d, n);
 	}
 
@@ -50,8 +56,9 @@ public class Node {
 
 		if (leftChild != null) {
 			if (leftChild.isApex()) {
-				this.childNodes.put(Direction.LEFT, this.lModel.rules.getNewNode(leftChild.getSymbol()));
-				this.childNodes.get(Direction.LEFT).setCoordinates(this.endCoordinates, Direction.LEFT);
+				this.setChildNode(Direction.LEFT, this.lModel.rules.getNewNode(leftChild.getSymbol()));
+				this.childNodes.get(Direction.LEFT).setCoordinates(this.endCoordinates, this.angle, this.direction,
+						this.lastDirection, Direction.LEFT);
 				this.lModel.gp.addLine(step, this.childNodes.get(Direction.LEFT).getLine());
 			} else {
 				leftChild.replaceAndDrawChilds(step);
@@ -59,8 +66,9 @@ public class Node {
 		}
 		if (centerChild != null) {
 			if (centerChild.isApex()) {
-				this.childNodes.put(Direction.CENTER, this.lModel.rules.getNewNode(centerChild.getSymbol()));
-				this.childNodes.get(Direction.CENTER).setCoordinates(this.endCoordinates, Direction.CENTER);
+				this.setChildNode(Direction.CENTER, this.lModel.rules.getNewNode(centerChild.getSymbol()));
+				this.childNodes.get(Direction.CENTER).setCoordinates(this.endCoordinates, this.angle, this.direction,
+						this.lastDirection, Direction.CENTER);
 				this.lModel.gp.addLine(step, this.childNodes.get(Direction.CENTER).getLine());
 			} else {
 				centerChild.replaceAndDrawChilds(step);
@@ -68,8 +76,9 @@ public class Node {
 		}
 		if (rightChild != null) {
 			if (rightChild.isApex()) {
-				this.childNodes.put(Direction.RIGHT, this.lModel.rules.getNewNode(rightChild.getSymbol()));
-				this.childNodes.get(Direction.RIGHT).setCoordinates(this.endCoordinates, Direction.RIGHT);
+				this.setChildNode(Direction.RIGHT, this.lModel.rules.getNewNode(rightChild.getSymbol()));
+				this.childNodes.get(Direction.RIGHT).setCoordinates(this.endCoordinates, this.angle, this.direction,
+						this.lastDirection, Direction.RIGHT);
 				this.lModel.gp.addLine(step, this.childNodes.get(Direction.RIGHT).getLine());
 			} else {
 				rightChild.replaceAndDrawChilds(step);
@@ -78,37 +87,97 @@ public class Node {
 	}
 
 	public void setCoordinates() {
-		this.setCoordinates(null, Direction.CENTER);
+		this.setCoordinates(null, 0, Direction.CENTER, Direction.CENTER, Direction.CENTER);
 	}
 
-	public void setCoordinates(Point2D endPointParent, Direction myDirection) {
+	public void setCoordinates(Point2D endPointParent, double parentAngle, Direction parentDirection,
+			Direction lastDirection, Direction myDirection) {
 		// i am groot!
 		if (endPointParent == null) {
 			this.startCoordinates = new Point2D.Double(400, 800);
 		} else {
 			this.startCoordinates = endPointParent;
 		}
+		
+		if(this.lastDirection == Direction.CENTER)
+			this.lastDirection = lastDirection;
 
 		switch (myDirection) {
 		case LEFT:
+			this.lastDirection = Direction.LEFT;
+			switch (parentDirection) {
+			case LEFT:
+				this.angle = parentAngle + this.lModel.getAngle() * 2;
+				break;
+			case RIGHT:
+				this.angle = parentAngle;
+				break;
+			case CENTER:
+				this.angle = parentAngle + this.lModel.getAngle();
+				break;
+			}
 			this.endCoordinates = new Point2D.Double(
-					this.startCoordinates.getX()
-							- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.lModel.getAngle())),
-					this.startCoordinates.getY()
-							- this.lModel.getStepSize() * Math.sin(Math.toRadians(this.lModel.getAngle())));
+					this.startCoordinates.getX() - this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+					this.startCoordinates.getY() - this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
 			break;
 		case CENTER:
-			this.endCoordinates = new Point2D.Double(this.startCoordinates.getX(),
-					this.startCoordinates.getY() - this.lModel.getStepSize());
+			this.angle = parentAngle;
+			switch (parentDirection) {
+			case LEFT:
+				this.endCoordinates = new Point2D.Double(
+						this.startCoordinates.getX() - this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+						this.startCoordinates.getY()
+								- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+				break;
+			case CENTER:
+				switch (lastDirection) {
+				case LEFT:
+					this.angle = parentAngle + this.lModel.getAngle();
+					this.endCoordinates = new Point2D.Double(
+							this.startCoordinates.getX()
+									- this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+							this.startCoordinates.getY()
+									- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+					break;
+				case CENTER:
+					this.endCoordinates = new Point2D.Double(this.startCoordinates.getX(),
+							this.startCoordinates.getY() - this.lModel.getStepSize());
+					break;
+				case RIGHT:
+					this.angle = parentAngle + this.lModel.getAngle();
+					this.endCoordinates = new Point2D.Double(
+							this.startCoordinates.getX()
+									+ this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+							this.startCoordinates.getY()
+									- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+					break;
+				}
+				break;
+			case RIGHT:
+				this.endCoordinates = new Point2D.Double(
+						this.startCoordinates.getX() + this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+						this.startCoordinates.getY()
+								- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+				break;
+			}
+
 			break;
 		case RIGHT:
+			this.lastDirection = Direction.RIGHT;
+			switch (parentDirection) {
+			case LEFT:
+				this.angle = parentAngle;
+				break;
+			case CENTER:
+				this.angle = parentAngle + this.lModel.getAngle();
+				break;
+			case RIGHT:
+				this.angle = parentAngle + this.lModel.getAngle() * 2;
+				break;
+			}
 			this.endCoordinates = new Point2D.Double(
-					this.startCoordinates.getX()
-							+ this.lModel.getStepSize() * Math.cos(Math.toRadians(this.lModel.getAngle())),
-					this.startCoordinates.getY()
-							- this.lModel.getStepSize() * Math.sin(Math.toRadians(this.lModel.getAngle())));
-			break;
-
+					this.startCoordinates.getX() + this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+					this.startCoordinates.getY() - this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
 		default:
 			break;
 		}
@@ -118,13 +187,13 @@ public class Node {
 			Node centerChild = this.childNodes.get(Direction.CENTER);
 			Node rightChild = this.childNodes.get(Direction.RIGHT);
 			if (leftChild != null) {
-				leftChild.setCoordinates(this.endCoordinates, Direction.LEFT);
+				leftChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection, Direction.LEFT);
 			}
 			if (centerChild != null) {
-				centerChild.setCoordinates(this.endCoordinates, Direction.CENTER);
+				centerChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection, Direction.CENTER);
 			}
 			if (rightChild != null) {
-				rightChild.setCoordinates(this.endCoordinates, Direction.RIGHT);
+				rightChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection, Direction.RIGHT);
 			}
 		}
 	}
