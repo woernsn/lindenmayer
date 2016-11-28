@@ -10,6 +10,7 @@ public class Node {
 	private LindenmayerModel lModel;
 	private char symbol;
 	private Map<Direction, Node> childNodes;
+	private Node parent;
 
 	private Direction direction;
 	private Direction lastDirection; // needed for calculation Center/Center
@@ -28,9 +29,11 @@ public class Node {
 		return this.childNodes.get(d);
 	}
 
-	public void setChildNode(Direction d, Node n) {
+	public Node setChildNode(Direction d, Node n) {
 		n.direction = d;
+		n.parent = this;
 		this.childNodes.put(d, n);
+		return this.childNodes.get(d);
 	}
 
 	public boolean isApex() {
@@ -47,6 +50,13 @@ public class Node {
 
 	public Line2D getLine() {
 		return new Line2D.Double(this.startCoordinates, this.endCoordinates);
+	}
+	
+	private int getMyDepth(int depth) {
+		if (this.parent == null) {
+			return 1;
+		}
+		return this.parent.getMyDepth(depth)+1;
 	}
 
 	public void replaceAndDrawChilds(int step) {
@@ -99,6 +109,8 @@ public class Node {
 			this.startCoordinates = endPointParent;
 		}
 		
+		double stepSize = this.lModel.getStepSize()/this.getMyDepth(0);
+		
 		if(this.lastDirection == Direction.CENTER)
 			this.lastDirection = lastDirection;
 
@@ -117,17 +129,17 @@ public class Node {
 				break;
 			}
 			this.endCoordinates = new Point2D.Double(
-					this.startCoordinates.getX() - this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
-					this.startCoordinates.getY() - this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+					this.startCoordinates.getX() - stepSize * Math.sin(Math.toRadians(this.angle)),
+					this.startCoordinates.getY() - stepSize * Math.cos(Math.toRadians(this.angle)));
 			break;
 		case CENTER:
 			this.angle = parentAngle;
 			switch (parentDirection) {
 			case LEFT:
 				this.endCoordinates = new Point2D.Double(
-						this.startCoordinates.getX() - this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+						this.startCoordinates.getX() - stepSize * Math.sin(Math.toRadians(this.angle)),
 						this.startCoordinates.getY()
-								- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+								- stepSize * Math.cos(Math.toRadians(this.angle)));
 				break;
 			case CENTER:
 				switch (lastDirection) {
@@ -135,29 +147,29 @@ public class Node {
 					this.angle = parentAngle + this.lModel.getAngle();
 					this.endCoordinates = new Point2D.Double(
 							this.startCoordinates.getX()
-									- this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+									- stepSize * Math.sin(Math.toRadians(this.angle)),
 							this.startCoordinates.getY()
-									- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+									- stepSize * Math.cos(Math.toRadians(this.angle)));
 					break;
 				case CENTER:
 					this.endCoordinates = new Point2D.Double(this.startCoordinates.getX(),
-							this.startCoordinates.getY() - this.lModel.getStepSize());
+							this.startCoordinates.getY() - stepSize);
 					break;
 				case RIGHT:
 					this.angle = parentAngle + this.lModel.getAngle();
 					this.endCoordinates = new Point2D.Double(
 							this.startCoordinates.getX()
-									+ this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+									+ stepSize * Math.sin(Math.toRadians(this.angle)),
 							this.startCoordinates.getY()
-									- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+									- stepSize * Math.cos(Math.toRadians(this.angle)));
 					break;
 				}
 				break;
 			case RIGHT:
 				this.endCoordinates = new Point2D.Double(
-						this.startCoordinates.getX() + this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
+						this.startCoordinates.getX() + stepSize * Math.sin(Math.toRadians(this.angle)),
 						this.startCoordinates.getY()
-								- this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+								- stepSize * Math.cos(Math.toRadians(this.angle)));
 				break;
 			}
 
@@ -176,8 +188,8 @@ public class Node {
 				break;
 			}
 			this.endCoordinates = new Point2D.Double(
-					this.startCoordinates.getX() + this.lModel.getStepSize() * Math.sin(Math.toRadians(this.angle)),
-					this.startCoordinates.getY() - this.lModel.getStepSize() * Math.cos(Math.toRadians(this.angle)));
+					this.startCoordinates.getX() + stepSize * Math.sin(Math.toRadians(this.angle)),
+					this.startCoordinates.getY() - stepSize * Math.cos(Math.toRadians(this.angle)));
 		default:
 			break;
 		}

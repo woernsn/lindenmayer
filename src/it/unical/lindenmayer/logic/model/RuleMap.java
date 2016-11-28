@@ -9,13 +9,13 @@ import java.util.Random;
 
 public class RuleMap {
 
-	private int propabilities;
+	private Map<Character, Integer> propabilities;
 	private Map<Character, List<Rule>> ruleMap;
 
 	private Node finalNode;
 
 	public RuleMap(Node finalNode) {
-		this.propabilities = 0;
+		this.propabilities = new HashMap<>();
 		this.ruleMap = new HashMap<>();
 		this.finalNode = finalNode;
 	}
@@ -43,10 +43,15 @@ public class RuleMap {
 	}
 
 	private void checkPropabilityOverflow(Rule element) {
-		this.propabilities += element.getPropability();
-		if (this.propabilities > 100) {
+		if(this.propabilities.get(element.getSymbolFrom()) == null) {
+			this.propabilities.put(element.getSymbolFrom(), 0);
+		}
+		int currentProp = this.propabilities.get(element.getSymbolFrom());
+		currentProp += element.getPropability();
+		if (currentProp > 100) {
 			throw new IllegalArgumentException("Propability of the RuleSet is not allowed to be over 100!");
 		}
+		this.propabilities.put(element.getSymbolFrom(), currentProp);
 	}
 
 	public void add(Rule r) {
