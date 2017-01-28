@@ -87,7 +87,7 @@ public class GraphicPanel extends JFrame {
 				try {
 					for (Line2D line : lines.get(i)) {
 						g2.setStroke(this.stroke);
-						g2.setColor(new Color(i * colorWidth, i * colorWidth, i * colorWidth));
+						g2.setColor(new Color(i * colorWidth, Math.min(100+(i*colorWidth), 255), i * colorWidth));
 						g2.draw(line);
 					}
 				} catch (NullPointerException e) {

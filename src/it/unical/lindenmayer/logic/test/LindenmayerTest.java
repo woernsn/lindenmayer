@@ -10,7 +10,7 @@ public class LindenmayerTest {
 	public static void main(String[] args) {
 		runTest1();
 		runTest2();
-		runTest3();
+//		runTest3();
 	}
 
 	@SuppressWarnings("unused")
