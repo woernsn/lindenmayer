@@ -25,6 +25,7 @@ public class GraphicPanel extends JFrame {
 		super("Lindenmayer");
 		this.setSize(800, 800);
 		this.setVisible(false);
+		this.setBackground(Color.WHITE);
 
 		this.panel = new LinePanel();
 

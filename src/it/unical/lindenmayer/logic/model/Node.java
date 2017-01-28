@@ -104,7 +104,7 @@ public class Node {
 			Direction lastDirection, Direction myDirection) {
 		// i am groot!
 		if (endPointParent == null) {
-			this.startCoordinates = new Point2D.Double(400, 800);
+			this.startCoordinates = new Point2D.Double(400, 775);
 		} else {
 			this.startCoordinates = endPointParent;
 		}

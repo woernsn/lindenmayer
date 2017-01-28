@@ -2,7 +2,7 @@ package it.unical.lindenmayer.logic.model;
 
 public class Rule {
 
-	private int propability;
+	private int probability;
 	private Character symbolFrom;
 	private Node nodeTo;
 	
@@ -10,17 +10,17 @@ public class Rule {
 		this(symbolFrom, nodeTo, 100);
 	}
 	
-	public Rule(Character symbolFrom, Node nodeTo, int propability) throws IllegalArgumentException {
-		if(propability < 0 || propability > 100) {
+	public Rule(Character symbolFrom, Node nodeTo, int probability) throws IllegalArgumentException {
+		if(probability < 0 || probability > 100) {
 			throw new IllegalArgumentException("Propability has to be between 0 and 100.");
 		}
 		this.symbolFrom = symbolFrom;
 		this.nodeTo = nodeTo;
-		this.propability = propability;
+		this.probability = probability;
 	}
 	
-	public int getPropability() {
-		return this.propability;
+	public int getProbability() {
+		return this.probability;
 	}
 	
 	public Character getSymbolFrom() {

@@ -9,13 +9,13 @@ import java.util.Random;
 
 public class RuleMap {
 
-	private Map<Character, Integer> propabilities;
+	private Map<Character, Integer> probabilities;
 	private Map<Character, List<Rule>> ruleMap;
 
 	private Node finalNode;
 
 	public RuleMap(Node finalNode) {
-		this.propabilities = new HashMap<>();
+		this.probabilities = new HashMap<>();
 		this.ruleMap = new HashMap<>();
 		this.finalNode = finalNode;
 	}
@@ -30,7 +30,7 @@ public class RuleMap {
 		int sum = 0;
 		try {
 			for (Rule r : this.ruleMap.get(symbolFrom)) {
-				sum += r.getPropability();
+				sum += r.getProbability();
 				if (randomNumber < sum) {
 					return r.getNodeTo();
 				}
@@ -42,20 +42,20 @@ public class RuleMap {
 		return null;
 	}
 
-	private void checkPropabilityOverflow(Rule element) {
-		if(this.propabilities.get(element.getSymbolFrom()) == null) {
-			this.propabilities.put(element.getSymbolFrom(), 0);
+	private void checkProbabilityOverflow(Rule element) {
+		if(this.probabilities.get(element.getSymbolFrom()) == null) {
+			this.probabilities.put(element.getSymbolFrom(), 0);
 		}
-		int currentProp = this.propabilities.get(element.getSymbolFrom());
-		currentProp += element.getPropability();
+		int currentProp = this.probabilities.get(element.getSymbolFrom());
+		currentProp += element.getProbability();
 		if (currentProp > 100) {
 			throw new IllegalArgumentException("Propability of the RuleSet is not allowed to be over 100!");
 		}
-		this.propabilities.put(element.getSymbolFrom(), currentProp);
+		this.probabilities.put(element.getSymbolFrom(), currentProp);
 	}
 
 	public void add(Rule r) {
-		checkPropabilityOverflow(r);
+		checkProbabilityOverflow(r);
 		if (this.ruleMap.get(r.getSymbolFrom()) == null) {
 			this.ruleMap.put(r.getSymbolFrom(), new ArrayList<Rule>());
 		}
