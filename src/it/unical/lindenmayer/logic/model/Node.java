@@ -4,6 +4,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class Node {
 
@@ -17,12 +18,26 @@ public class Node {
 	private Point2D startCoordinates, endCoordinates;
 	private double angle;
 
+	private Function<Double[], Double> branchSizeFunction;
+
 	protected Node(LindenmayerModel lModel, char s) {
 		this.lModel = lModel;
 		this.symbol = s;
 		this.childNodes = new HashMap<>();
 		this.direction = Direction.CENTER; // default
 		this.lastDirection = Direction.CENTER; // default
+
+		this.branchSizeFunction = new Function<Double[], Double>() {
+
+			@Override
+			public Double apply(Double[] t) {
+				// t[0] = double stepSize
+				// t[1] = int myDepth
+				double stepSize = t[0];
+				double myDepth = t[1];
+				return stepSize / myDepth;
+			}
+		};
 	}
 
 	public Node getChildNode(Direction d) {
@@ -52,11 +67,19 @@ public class Node {
 		return new Line2D.Double(this.startCoordinates, this.endCoordinates);
 	}
 	
+	public Function<Double[], Double> getBranchSizeFunction() {
+		return branchSizeFunction;
+	}
+
+	public void setBranchSizeFunction(Function<Double[], Double> branchSizeFunction) {
+		this.branchSizeFunction = branchSizeFunction;
+	}
+
 	private int getMyDepth(int depth) {
 		if (this.parent == null) {
 			return 1;
 		}
-		return this.parent.getMyDepth(depth)+1;
+		return this.parent.getMyDepth(depth) + 1;
 	}
 
 	public void replaceAndDrawChilds(int step) {
@@ -108,10 +131,11 @@ public class Node {
 		} else {
 			this.startCoordinates = endPointParent;
 		}
-		
-		double stepSize = this.lModel.getStepSize()/this.getMyDepth(0);
-		
-		if(this.lastDirection == Direction.CENTER)
+
+		double stepSize = this.branchSizeFunction
+				.apply(new Double[] { this.lModel.getStepSize(), new Double(this.getMyDepth(0)) });
+
+		if (this.lastDirection == Direction.CENTER)
 			this.lastDirection = lastDirection;
 
 		switch (myDirection) {
@@ -138,18 +162,15 @@ public class Node {
 			case LEFT:
 				this.endCoordinates = new Point2D.Double(
 						this.startCoordinates.getX() - stepSize * Math.sin(Math.toRadians(this.angle)),
-						this.startCoordinates.getY()
-								- stepSize * Math.cos(Math.toRadians(this.angle)));
+						this.startCoordinates.getY() - stepSize * Math.cos(Math.toRadians(this.angle)));
 				break;
 			case CENTER:
 				switch (lastDirection) {
 				case LEFT:
 					this.angle = parentAngle + this.lModel.getAngle();
 					this.endCoordinates = new Point2D.Double(
-							this.startCoordinates.getX()
-									- stepSize * Math.sin(Math.toRadians(this.angle)),
-							this.startCoordinates.getY()
-									- stepSize * Math.cos(Math.toRadians(this.angle)));
+							this.startCoordinates.getX() - stepSize * Math.sin(Math.toRadians(this.angle)),
+							this.startCoordinates.getY() - stepSize * Math.cos(Math.toRadians(this.angle)));
 					break;
 				case CENTER:
 					this.endCoordinates = new Point2D.Double(this.startCoordinates.getX(),
@@ -158,18 +179,15 @@ public class Node {
 				case RIGHT:
 					this.angle = parentAngle + this.lModel.getAngle();
 					this.endCoordinates = new Point2D.Double(
-							this.startCoordinates.getX()
-									+ stepSize * Math.sin(Math.toRadians(this.angle)),
-							this.startCoordinates.getY()
-									- stepSize * Math.cos(Math.toRadians(this.angle)));
+							this.startCoordinates.getX() + stepSize * Math.sin(Math.toRadians(this.angle)),
+							this.startCoordinates.getY() - stepSize * Math.cos(Math.toRadians(this.angle)));
 					break;
 				}
 				break;
 			case RIGHT:
 				this.endCoordinates = new Point2D.Double(
 						this.startCoordinates.getX() + stepSize * Math.sin(Math.toRadians(this.angle)),
-						this.startCoordinates.getY()
-								- stepSize * Math.cos(Math.toRadians(this.angle)));
+						this.startCoordinates.getY() - stepSize * Math.cos(Math.toRadians(this.angle)));
 				break;
 			}
 
@@ -199,13 +217,16 @@ public class Node {
 			Node centerChild = this.childNodes.get(Direction.CENTER);
 			Node rightChild = this.childNodes.get(Direction.RIGHT);
 			if (leftChild != null) {
-				leftChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection, Direction.LEFT);
+				leftChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection,
+						Direction.LEFT);
 			}
 			if (centerChild != null) {
-				centerChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection, Direction.CENTER);
+				centerChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection,
+						Direction.CENTER);
 			}
 			if (rightChild != null) {
-				rightChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection, Direction.RIGHT);
+				rightChild.setCoordinates(this.endCoordinates, this.angle, myDirection, this.lastDirection,
+						Direction.RIGHT);
 			}
 		}
 	}
