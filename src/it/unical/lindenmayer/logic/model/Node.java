@@ -1,10 +1,11 @@
 package it.unical.lindenmayer.logic.model;
 
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import it.unical.lindenmayer.graphics.Line2D;
 
 public class Node {
 
@@ -35,8 +36,8 @@ public class Node {
 				// t[1] = double myDepth
 				// t[2] = Node node
 
-				double stepSize = (double)t[0];
-				double myDepth = (double)t[1];
+				double stepSize = (double) t[0];
+				double myDepth = (double) t[1];
 				return stepSize / myDepth;
 			}
 		};
@@ -66,9 +67,9 @@ public class Node {
 	}
 
 	public Line2D getLine() {
-		return new Line2D.Double(this.startCoordinates, this.endCoordinates);
+		return new Line2D(this.startCoordinates, this.endCoordinates);
 	}
-	
+
 	public Function<Object[], Double> getBranchSizeFunction() {
 		return branchSizeFunction;
 	}
@@ -76,7 +77,7 @@ public class Node {
 	public void setBranchSizeFunction(Function<Object[], Double> branchSizeFunction) {
 		this.branchSizeFunction = branchSizeFunction;
 	}
-	
+
 	public Node getParent() {
 		return this.parent;
 	}
@@ -87,39 +88,60 @@ public class Node {
 		}
 		return this.parent.getMyDepth(depth) + 1;
 	}
-	
+
 	public void replaceAndDrawChilds(int step) {
 		Node leftChild = this.childNodes.get(Direction.LEFT);
 		Node centerChild = this.childNodes.get(Direction.CENTER);
 		Node rightChild = this.childNodes.get(Direction.RIGHT);
 
 		if (leftChild != null) {
+			Node nodeToDraw = null;
 			if (leftChild.isApex()) {
 				this.setChildNode(Direction.LEFT, this.lModel.rules.getNewNode(leftChild.getSymbol()));
 				this.childNodes.get(Direction.LEFT).setCoordinates(this.endCoordinates, this.angle, this.direction,
 						this.lastDirection, Direction.LEFT);
-				this.lModel.gp.addLine(step, this.childNodes.get(Direction.LEFT).getLine());
+				nodeToDraw = this.childNodes.get(Direction.LEFT);
 			} else {
+				nodeToDraw = new Node(this.lModel, leftChild.getSymbol());
+				nodeToDraw.setCoordinates(this.endCoordinates, this.angle, this.direction, this.lastDirection,
+						Direction.LEFT);
+			}
+			this.lModel.gp.addLine(step, nodeToDraw.getLine());
+			if (leftChild.isInternode()) {
 				leftChild.replaceAndDrawChilds(step);
 			}
 		}
 		if (centerChild != null) {
+			Node nodeToDraw = null;
 			if (centerChild.isApex()) {
 				this.setChildNode(Direction.CENTER, this.lModel.rules.getNewNode(centerChild.getSymbol()));
 				this.childNodes.get(Direction.CENTER).setCoordinates(this.endCoordinates, this.angle, this.direction,
 						this.lastDirection, Direction.CENTER);
-				this.lModel.gp.addLine(step, this.childNodes.get(Direction.CENTER).getLine());
+				nodeToDraw = this.childNodes.get(Direction.CENTER);
 			} else {
+				nodeToDraw = new Node(this.lModel, centerChild.getSymbol());
+				nodeToDraw.setCoordinates(this.endCoordinates, this.angle, this.direction, this.lastDirection,
+						Direction.CENTER);
+			}
+			this.lModel.gp.addLine(step, nodeToDraw.getLine());
+			if (centerChild.isInternode()) {
 				centerChild.replaceAndDrawChilds(step);
 			}
 		}
 		if (rightChild != null) {
+			Node nodeToDraw = null;
 			if (rightChild.isApex()) {
 				this.setChildNode(Direction.RIGHT, this.lModel.rules.getNewNode(rightChild.getSymbol()));
 				this.childNodes.get(Direction.RIGHT).setCoordinates(this.endCoordinates, this.angle, this.direction,
 						this.lastDirection, Direction.RIGHT);
-				this.lModel.gp.addLine(step, this.childNodes.get(Direction.RIGHT).getLine());
+				nodeToDraw = this.childNodes.get(Direction.RIGHT);
 			} else {
+				nodeToDraw = new Node(this.lModel, rightChild.getSymbol());
+				nodeToDraw.setCoordinates(this.endCoordinates, this.angle, this.direction, this.lastDirection,
+						Direction.RIGHT);
+			}
+			this.lModel.gp.addLine(step, nodeToDraw.getLine());
+			if (rightChild.isInternode()) {
 				rightChild.replaceAndDrawChilds(step);
 			}
 		}
@@ -217,7 +239,7 @@ public class Node {
 		default:
 			break;
 		}
-
+		
 		if (this.isInternode()) {
 			Node leftChild = this.childNodes.get(Direction.LEFT);
 			Node centerChild = this.childNodes.get(Direction.CENTER);

@@ -6,7 +6,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +87,7 @@ public class GraphicPanel extends JFrame {
 				try {
 					for (Line2D line : lines.get(i)) {
 						g2.setStroke(this.stroke);
-						g2.setColor(new Color(i * colorWidth, Math.min(100+(i*colorWidth), 255), i * colorWidth));
+						g2.setColor(new Color(i * colorWidth, Math.min(100 + (i * colorWidth), 255), i * colorWidth));
 						g2.draw(line);
 					}
 				} catch (NullPointerException e) {
@@ -106,7 +105,18 @@ public class GraphicPanel extends JFrame {
 			if (this.lines.get(interval) == null) {
 				this.lines.put(interval, new ArrayList<Line2D>());
 			}
-			this.lines.get(interval).add(line);
+
+			boolean alreadyExisting = false;
+			for (int i = 0; i <= interval; i++) {
+				if (this.lines.get(i).contains(line)) {
+					alreadyExisting = true;
+					break;
+				}
+			}
+
+			if (!alreadyExisting) {
+				this.lines.get(interval).add(line);
+			}
 		}
 
 		public int getMaximalStep() {
