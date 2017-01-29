@@ -18,7 +18,7 @@ public class Node {
 	private Point2D startCoordinates, endCoordinates;
 	private double angle;
 
-	private Function<Double[], Double> branchSizeFunction;
+	private Function<Object[], Double> branchSizeFunction;
 
 	protected Node(LindenmayerModel lModel, char s) {
 		this.lModel = lModel;
@@ -27,31 +27,17 @@ public class Node {
 		this.direction = Direction.CENTER; // default
 		this.lastDirection = Direction.CENTER; // default
 
-		this.branchSizeFunction = new Function<Double[], Double>() {
+		this.branchSizeFunction = new Function<Object[], Double>() {
 
 			@Override
-			public Double apply(Double[] t) {
+			public Double apply(Object[] t) {
 				// t[0] = double stepSize
-				// t[1] = int myDepth
-				double k1 = 50, k2 = 2, k3 = 3, k4 = 4, k5 = 0.2;
-				double o = t[1]+1;
-				double m = Node.this.getInternodeNumber();
-				double a = k1 + k2*o + k3*m + k4*m + k5*m*m;
-				double b = 11.5*Math.pow(10, 6);
-				double c = 0.58 + 0.0144*a - 0.0244*m;
-				double x = a/(1 + b * Math.pow(Math.E, -c*(t[1]/100)));
-				System.out.println(o+ " "+ m + " "+ x*Math.pow(10, 7));
-				return x*Math.pow(10, 7);
+				// t[1] = double myDepth
+				// t[2] = Node node
 
-				/*double stepSize = t[0];
-				double myDepth = t[1];
-				return stepSize / myDepth;*/
-
-
-				/*
-				 * put the function according to the paper
-				 * inserire nelle slides figure della pianta con i nomi inglesi per ogni parte
-				 */
+				double stepSize = (double)t[0];
+				double myDepth = (double)t[1];
+				return stepSize / myDepth;
 			}
 		};
 	}
@@ -83,12 +69,16 @@ public class Node {
 		return new Line2D.Double(this.startCoordinates, this.endCoordinates);
 	}
 	
-	public Function<Double[], Double> getBranchSizeFunction() {
+	public Function<Object[], Double> getBranchSizeFunction() {
 		return branchSizeFunction;
 	}
 
-	public void setBranchSizeFunction(Function<Double[], Double> branchSizeFunction) {
+	public void setBranchSizeFunction(Function<Object[], Double> branchSizeFunction) {
 		this.branchSizeFunction = branchSizeFunction;
+	}
+	
+	public Node getParent() {
+		return this.parent;
 	}
 
 	private int getMyDepth(int depth) {
@@ -98,15 +88,6 @@ public class Node {
 		return this.parent.getMyDepth(depth) + 1;
 	}
 	
-	private int getInternodeNumber() {
-		if (this.parent == null) {
-			return 0;
-		}
-		if (this.parent.symbol == 'I')
-			return this.parent.getInternodeNumber()+1;
-		return this.parent.getInternodeNumber();
-	}
-
 	public void replaceAndDrawChilds(int step) {
 		Node leftChild = this.childNodes.get(Direction.LEFT);
 		Node centerChild = this.childNodes.get(Direction.CENTER);
@@ -158,7 +139,7 @@ public class Node {
 		}
 
 		double stepSize = this.branchSizeFunction
-				.apply(new Double[] { this.lModel.getStepSize(), new Double(this.getMyDepth(0)) });
+				.apply(new Object[] { this.lModel.getStepSize(), new Double(this.getMyDepth(0)), this });
 
 		if (this.lastDirection == Direction.CENTER)
 			this.lastDirection = lastDirection;

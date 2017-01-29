@@ -1,5 +1,7 @@
 package it.unical.lindenmayer.logic.model;
 
+import java.util.function.Function;
+
 import it.unical.lindenmayer.graphics.GraphicPanel;
 
 public class LindenmayerModel {
@@ -40,6 +42,12 @@ public class LindenmayerModel {
 	
 	public Node createNode(char symbol) {
 		return new Node(this, symbol);
+	}
+	
+	public Node createNode(char symbol, Function<Object[], Double> branchSizeFunction) {
+		Node newNode = new Node(this, symbol);
+		newNode.setBranchSizeFunction(branchSizeFunction);
+		return newNode;
 	}
 	
 	public void start(char rootSymbol) {
