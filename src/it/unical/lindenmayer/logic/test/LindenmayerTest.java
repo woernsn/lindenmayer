@@ -10,10 +10,10 @@ import it.unical.lindenmayer.logic.model.Rule;
 public class LindenmayerTest {
 
 	public static void main(String[] args) {
-		 runTest1();
+//		 runTest1();
 //		 runTest2();
 //		runTest3();
-//		 fraxinusPens();
+		 fraxinusPens();
 	}
 
 	@SuppressWarnings("unused")
@@ -37,7 +37,7 @@ public class LindenmayerTest {
 
 		lm.addRule(r1);
 
-		lm.start('F');
+		lm.start(lm.createNode('F'));
 	}
 
 	@SuppressWarnings("unused")
@@ -68,7 +68,7 @@ public class LindenmayerTest {
 		lm.addRule(r1);
 		lm.addRule(r2);
 
-		lm.start('F');
+		lm.start(lm.createNode('F'));
 	}
 
 	private static void runTest3() {
@@ -100,7 +100,7 @@ public class LindenmayerTest {
 		lm.addRule(r1);
 		lm.addRule(r2);
 
-		lm.start('G');
+		lm.start(lm.createNode('G'));
 	}
 
 	@SuppressWarnings("unused")
@@ -110,11 +110,11 @@ public class LindenmayerTest {
 			@Override
 			public Double apply(Object[] t) {
 				double stepSize = (double) t[0];
-				Node node = (Node) t[1];
+				Node node = (Node) t[2];
 
 				double k1 = 50, k2 = 2, k3 = 3, k4 = 4, k5 = 0.2;
 				double o = (double) t[1] + 1;
-				double m = getInternodeNumber((Node) t[2]);
+				double m = getInternodeNumber(node);
 				double a = k1 + k2 * o + k3 * m + k4 * m + k5 * m * m;
 				double b = 11.5 * Math.pow(10, 6);
 				double c = 0.58 + 0.0144 * a - 0.0244 * m;
@@ -170,7 +170,7 @@ public class LindenmayerTest {
 		lm.addRule(r3);
 		lm.addRule(r4);
 
-		lm.start('I');
+		lm.start(lm.createNode('I', branchSizeFunction));
 	}
 
 	private static int getInternodeNumber(Node n) {

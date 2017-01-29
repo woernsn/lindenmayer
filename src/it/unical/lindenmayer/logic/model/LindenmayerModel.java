@@ -9,23 +9,23 @@ public class LindenmayerModel {
 	private final static double DEFAULT_ANGLE = 45;
 	private final static double DEFAULT_STEPSIZE = 100;
 	private final static double DEFAULT_TIMEOUT = 1;
-	
+
 	private double angle;
 	private double stepSize;
 	private double timeout;
 	protected RuleMap rules;
 	private int steps;
-	
+
 	protected GraphicPanel gp;
-	
+
 	public LindenmayerModel() {
 		this(DEFAULT_ANGLE);
 	}
-	
+
 	public LindenmayerModel(double angle) {
 		this(angle, DEFAULT_STEPSIZE);
 	}
-	
+
 	public LindenmayerModel(double angle, double stepSize) {
 		this.angle = angle;
 		this.stepSize = stepSize;
@@ -39,33 +39,46 @@ public class LindenmayerModel {
 	public void addRule(Rule r) {
 		this.rules.add(r);
 	}
-	
+
 	public Node createNode(char symbol) {
 		return new Node(this, symbol);
 	}
-	
+
 	public Node createNode(char symbol, Function<Object[], Double> branchSizeFunction) {
 		Node newNode = new Node(this, symbol);
 		newNode.setBranchSizeFunction(branchSizeFunction);
 		return newNode;
 	}
-	
-	public void start(char rootSymbol) {
+
+	public void start(Node rootNode) {
 		// build tree
-		Node rootNode = new Node(this, rootSymbol);
 		rootNode.setCoordinates();
 		this.gp.addLine(0, rootNode.getLine());
-		rootNode = rules.getNewNode(rootNode); //first step
+		rootNode = rules.getNewNode(rootNode); // first step
 		rootNode.setCoordinates();
 		for (int i = 1; i < this.steps; i++) {
 			rootNode.replaceAndDrawChilds(i);
 		}
-		
+
 		this.gp.setVisible(true);
 		this.gp.startAnimation(this.timeout);
 	}
-	
-	
+
+//	public void start(char rootSymbol) {
+//		// build tree
+//		Node rootNode = new Node(this, rootSymbol);
+//		rootNode.setCoordinates();
+//		this.gp.addLine(0, rootNode.getLine());
+//		rootNode = rules.getNewNode(rootNode); // first step
+//		rootNode.setCoordinates();
+//		for (int i = 1; i < this.steps; i++) {
+//			rootNode.replaceAndDrawChilds(i);
+//		}
+//
+//		this.gp.setVisible(true);
+//		this.gp.startAnimation(this.timeout);
+//	}
+
 	public double getAngle() {
 		return angle;
 	}
@@ -105,5 +118,5 @@ public class LindenmayerModel {
 	public void setTimeout(double timeout) {
 		this.timeout = timeout;
 	}
-	
+
 }

@@ -102,7 +102,7 @@ public class Node {
 						this.lastDirection, Direction.LEFT);
 				nodeToDraw = this.childNodes.get(Direction.LEFT);
 			} else {
-				nodeToDraw = new Node(this.lModel, leftChild.getSymbol());
+				nodeToDraw = leftChild.deepCopy();
 				nodeToDraw.setCoordinates(this.endCoordinates, this.angle, this.direction, this.lastDirection,
 						Direction.LEFT);
 			}
@@ -119,7 +119,7 @@ public class Node {
 						this.lastDirection, Direction.CENTER);
 				nodeToDraw = this.childNodes.get(Direction.CENTER);
 			} else {
-				nodeToDraw = new Node(this.lModel, centerChild.getSymbol());
+				nodeToDraw = centerChild.deepCopy();
 				nodeToDraw.setCoordinates(this.endCoordinates, this.angle, this.direction, this.lastDirection,
 						Direction.CENTER);
 			}
@@ -136,7 +136,7 @@ public class Node {
 						this.lastDirection, Direction.RIGHT);
 				nodeToDraw = this.childNodes.get(Direction.RIGHT);
 			} else {
-				nodeToDraw = new Node(this.lModel, rightChild.getSymbol());
+				nodeToDraw = rightChild.deepCopy();
 				nodeToDraw.setCoordinates(this.endCoordinates, this.angle, this.direction, this.lastDirection,
 						Direction.RIGHT);
 			}
@@ -274,6 +274,8 @@ public class Node {
 		if (rightChild != null) {
 			newNode.setChildNode(Direction.RIGHT, rightChild.deepCopy());
 		}
+		
+		newNode.setBranchSizeFunction(this.branchSizeFunction);
 
 		return newNode;
 	}
