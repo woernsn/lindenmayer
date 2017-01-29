@@ -23,7 +23,7 @@ public class GraphicPanel extends JFrame {
 
 	public GraphicPanel() {
 		super("Lindenmayer");
-		this.setSize(800, 800);
+		this.setSize(750, 750);
 		this.setVisible(false);
 		this.setBackground(Color.WHITE);
 
